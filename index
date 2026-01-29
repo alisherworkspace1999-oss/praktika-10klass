@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML кестелері – Практикалық сабақ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --success: #10b981;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #0f172a;
+            --hint: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Шапка */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        /* Негізгі блок */
+        .workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Тапсырмалар панелі */
+        .sidebar {
+            width: 380px;
+            background: #fff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .task-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .task-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .task-card.active {
+            border: 2px solid var(--primary);
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+        }
+
+        .task-card.done {
+            background: #f0fdf4;
+            border-color: var(--success);
+        }
+
+        .hint-tag {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: var(--hint);
+            font-weight: 500;
+        }
+
+        .task-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 5px; color: var(--primary); }
+        .task-text { font-size: 0.85rem; line-height: 1.4; color: #475569; }
+
+        /* Оң жақ панель: Редактор және Preview */
+        .editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+        }
+
+        .editor-header {
+            background: #2d2d2d;
+            padding: 8px 20px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        textarea {
+            flex: 1;
+            background: #1e1e1e;
+            color: #e2e8f0;
+            font-family: 'Fira Code', monospace;
+            font-size: 16px;
+            padding: 20px;
+            border: none;
+            outline: none;
+            resize: none;
+            line-height: 1.5;
+        }
+
+        .preview-pane {
+            height: 40%;
+            background: #fff;
+            border-top: 4px solid #cbd5e1;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        /* Кестенің нақты көрінісі */
+        table { border-collapse: collapse; min-width: 200px; margin: auto; }
+        th, td { border: 1px solid #334155; padding: 12px; text-align: center; }
+        th { background: #f1f5f9; }
+
+        /* Түйме */
+        .check-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .check-btn:hover { filter: brightness(1.1); }
+
+        #final-badge {
+            display: none;
+            padding: 30px;
+            text-align: center;
+            background: #f0fdf4;
+            border-radius: 12px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div><i class="fas fa-code me-2"></i> <strong>HTML Кесте Конструкторы</strong></div>
+    <div id="progress-text">Орындалғаны: 0 / 10</div>
+</header>
+
+<div class="workspace">
+    <div class="sidebar">
+        <div class="task-list" id="task-list">
+            <div id="tasks-content"></div>
+            <div id="final-badge" class="animate__animated animate__zoomIn">
+                <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--success);"></i>
+                <h3 style="margin-top:10px">Жарайсың!</h3>
+                <p>10/10 балл жинадың!</p>
+                <button onclick="location.reload()" class="check-btn">Қайта бастау</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor-container">
+        <div class="editor-header">
+            <span>index.html</span>
+            <span>&lt;/&gt;</span>
+        </div>
+        <textarea id="editor" spellcheck="false" oninput="updatePreview()" placeholder="Кодты осында жаза бастаңыз..."></textarea>
+        
+        <div class="editor-header" style="background:#f1f5f9; color:#475569; border-top:1px solid #ddd">
+            <span>НӘТИЖЕ (КЕСТЕ)</span>
+        </div>
+        <div class="preview-pane" id="preview"></div>
+    </div>
+</div>
+
+<script>
+    const tasks = [
+        { id: 1, tag: "<table>", title: "Контейнер ашу", q: "Кестенің негізгі <code>&lt;table&gt;</code> және <code>&lt;/table&gt;</code> тегтерін жазыңыз.", reg: /<table>[\s\S]*<\/table>/i },
+        { id: 2, tag: "border=\"1\"", title: "Жиек қосу", q: "Кесте сызықтары көрінуі үшін <code>table</code> тегіне <code>border=\"1\"</code> атрибутын қосыңыз.", reg: /<table\s+border=["']1["']/i },
+        { id: 3, tag: "<tr>", title: "Жол құру", q: "Кестенің ішіне бірінші жолды <code>&lt;tr&gt;</code> және <code>&lt;/tr&gt;</code> арқылы қосыңыз.", reg: /<tr>[\s\S]*<\/tr>/i },
+        { id: 4, tag: "<th>", title: "Баған атауы", q: "Бірінші жолдың ішіне 'Тауар' деген тақырып ұяшығын (th) қосыңыз.", reg: /<th>.*Тауар.*<\/th>/i },
+        { id: 5, tag: "<th>", title: "Екінші баған", q: "Сол жолға (tr) екінші тақырыпты қосыңыз: 'Бағасы'.", reg: /<th>.*Тауар.*<\/th>[\s\S]*<th>.*Бағасы.*<\/th>/i },
+        { id: 6, tag: "<tr> + <td>", title: "Мәлімет қосу", q: "Екінші жолды ашып (tr), оған 'Алма' деген мәліметті (td) жазыңыз.", reg: /<\/tr>[\s\S]*<tr>[\s\S]*<td>.*Алма.*<\/td>/i },
+        { id: 7, tag: "<td>", title: "Бағаны жазу", q: "Алманың жанына бағасын жазыңыз: '500'.", reg: /<td>.*Алма.*<\/td>[\s\S]*<td>.*500.*<\/td>/i },
+        { id: 8, tag: "colspan=\"2\"", title: "Біріктіру (Баған)", q: "Жаңа жол қосып, <code>colspan=\"2\"</code> арқылы 'Барлығы: 500' деген ұяшық жасаңыз.", reg: /<td\s+colspan=["']2["']>.*Барлығы.*<\/td>/i },
+        { id: 9, tag: "rowspan=\"2\"", title: "Біріктіру (Жол)", q: "Жаңа жол бастап, бірінші ұяшыққа <code>rowspan=\"2\"</code> атрибутын беріңіз (мәтіні 'Дүкен').", reg: /rowspan=["']2["']/i },
+        { id: 10, tag: "</table>", title: "Аяқтау", q: "Кестенің барлық ашық тегтерін (tr, td) тексеріп, кестені толық аяқтаңыз.", reg: /<\/tr>[\s\S]*<\/table>/i }
+    ];
+
+    let currentIdx = 0;
+    let completed = [];
+
+    function renderTasks() {
+        const container = document.getElementById('tasks-content');
+        container.innerHTML = '';
+        
+        tasks.forEach((t, i) => {
+            if(i > currentIdx) return;
+            
+            const isDone = completed.includes(t.id);
+            const card = document.createElement('div');
+            card.className = `task-card ${i === currentIdx ? 'active' : ''} ${isDone ? 'done' : ''}`;
+            card.innerHTML = `
+                <div class="hint-tag">${t.tag}</div>
+                <div class="task-title">${t.title}</div>
+                <div class="task-text">${t.q}</div>
+                ${i === currentIdx && !isDone ? `<button class="check-btn" onclick="checkTask(${t.id})">Тексеру</button>` : ''}
+                ${isDone ? '<div style="color:var(--success); font-size:0.8rem; margin-top:5px;"><i class="fas fa-check"></i> Орындалды</div>' : ''}
+            `;
+            container.appendChild(card);
+        });
+        
+        document.getElementById('progress-text').innerText = `Орындалғаны: ${completed.length} / 10`;
+        
+        if(completed.length === 10) {
+            document.getElementById('final-badge').style.display = 'block';
+        }
+        
+        // Автоматты түрде соңғы тапсырмаға жылжыту
+        const taskList = document.getElementById('task-list');
+        taskList.scrollTop = taskList.scrollHeight;
+    }
+
+    function updatePreview() {
+        const code = document.getElementById('editor').value;
+        document.getElementById('preview').innerHTML = code;
+    }
+
+    function checkTask(id) {
+        const code = document.getElementById('editor').value;
+        const task = tasks.find(t => t.id === id);
+
+        if(task.reg.test(code)) {
+            completed.push(id);
+            currentIdx++;
+            renderTasks();
+            new Audio('https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3').play().catch(()=>{});
+        } else {
+            alert("Кодта қате бар немесе шарт орындалмады. Подсказкаға (оң жақ жоғарыда) назар аударыңыз.");
+        }
+    }
+
+    // Бастапқы іске қосу
+    renderTasks();
+</script>
+</body>
+</html>
